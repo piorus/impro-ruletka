@@ -36,6 +36,8 @@
   #pic.reveal #flash { animation: flash 0.7s ease-out; }
   @keyframes flash { from { opacity: 0.8; } to { opacity: 0; } }
   #pic.fade { opacity: 0; transition: opacity 1.6s ease-in; }
+  #pic.fadein { animation: fadein 1.6s ease-out; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
   #warn {
     position: fixed; left: 0; right: 0; bottom: 20px; text-align: center;
@@ -143,12 +145,12 @@ function next() {
   switch (state.mode) {
     case "logo":  return spin();
     case "show":  return fadeToBlack();
-    case "black": return go({ ...state, mode: "show2" });
+    case "black": return fadeFromBlack();
     case "show2": return go({ ...state, mode: "logo" });
   }
 }
 
-const FADE_MS = 1600; // keep in sync with the #pic.fade transition
+const FADE_MS = 1600; // keep in sync with #pic.fade and #pic.fadein
 
 function fadeToBlack() {
   busy = true;
@@ -157,6 +159,16 @@ function fadeToBlack() {
   setTimeout(() => {
     go({ ...state, mode: "black" });
     picEl.classList.remove("fade");
+    busy = false;
+  }, FADE_MS);
+}
+
+function fadeFromBlack() {
+  busy = true;
+  picEl.classList.add("fadein");
+  go({ ...state, mode: "show2" });
+  setTimeout(() => {
+    picEl.classList.remove("fadein");
     busy = false;
   }, FADE_MS);
 }
