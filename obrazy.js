@@ -1,6 +1,5 @@
 // Wygenerowane przez odswiez-liste.sh
 const OBRAZY = [
-  "obrazy/3-maja-goya.jpg",
   "obrazy/burlacy.jpg",
   "obrazy/grande-jatte.jpg",
   "obrazy/grunwald.jpg",
