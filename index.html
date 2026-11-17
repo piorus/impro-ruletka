@@ -115,6 +115,15 @@ preloadAll();
 let state = { mode: "logo", img: null, pool: [] };
 const history = [];
 let spinning = false;
+// Paintings in draw order, so keys 1–9 can bring one back if the moderator skipped past it.
+const drawn = [];
+
+function recall(n) {
+  if (spinning || !drawn[n - 1]) return;
+  picEl.classList.remove("reveal");
+  // show2 makes the next Enter go straight to the logo; the pool stays untouched.
+  go({ ...state, mode: "show2", img: drawn[n - 1] });
+}
 
 function render() {
   logoEl.classList.toggle("on", state.mode === "logo");
@@ -166,6 +175,7 @@ function spin() {
       picImg.src = chosen;
       void picEl.offsetWidth; // restart the CSS animation
       picEl.classList.add("reveal");
+      drawn.push(chosen);
       go({ mode: "show", img: chosen, pool: rest });
       return;
     }
@@ -190,6 +200,7 @@ function toggleFullscreen() {
 
 document.addEventListener("keydown", e => {
   if (e.key === "f" || e.key === "F") { toggleFullscreen(); return; }
+  if (/^[1-9]$/.test(e.key)) { recall(+e.key); return; }
   if (NEXT_KEYS.includes(e.key)) {
     e.preventDefault();
     if (!document.fullscreenElement) toggleFullscreen();
