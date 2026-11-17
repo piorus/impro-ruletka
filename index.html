@@ -103,7 +103,9 @@ function back() {
 function spin() {
   if (all.length === 0) return;
   // Each group gets a different painting; refill only once everything has been used.
-  const pool = state.pool.length ? state.pool : all.slice();
+  // On refill drop the last shown painting so a new cycle can't open with a repeat.
+  let pool = state.pool.length ? state.pool : all.filter(p => p !== state.img);
+  if (pool.length === 0) pool = all.slice();
   const chosen = pool[Math.floor(Math.random() * pool.length)];
   const rest = pool.filter(p => p !== chosen);
 
@@ -124,7 +126,9 @@ function spin() {
     }
     let cand;
     do { cand = all[Math.floor(Math.random() * all.length)]; }
-    while (all.length > 1 && cand === prev);
+    // The final spin frame must differ from the winner, or the stop looks like a stall.
+    while ((all.length > 1 && cand === prev) ||
+           (all.length > 2 && delay * 1.12 > 420 && cand === chosen));
     prev = cand;
     picImg.src = cand;
     delay *= 1.12;
