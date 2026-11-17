@@ -2,7 +2,6 @@
 const OBRAZY = [
   "obrazy/3-maja-goya.jpg",
   "obrazy/burlacy.jpg",
-  "obrazy/gracze-w-karty.jpg",
   "obrazy/grande-jatte.jpg",
   "obrazy/grunwald.jpg",
   "obrazy/jedzacy-kartofle.jpg",
@@ -17,7 +16,6 @@ const OBRAZY = [
   "obrazy/przypowiesc-o-slepcach.jpg",
   "obrazy/skad-przychodzimy.jpg",
   "obrazy/smierc-sokratesa.jpg",
-  "obrazy/sniadanie-na-trawie.jpg",
   "obrazy/sniadanie-wioslarzy.jpg",
   "obrazy/straz-nocna.jpg",
   "obrazy/syndycy.jpg",
@@ -26,9 +24,7 @@ const OBRAZY = [
   "obrazy/tratwa-meduzy.jpg",
   "obrazy/wertumnus.jpg",
   "obrazy/wesele-chlopskie.jpg",
-  "obrazy/wieczerza-w-emaus.jpg",
   "obrazy/wielka-fala.jpg",
   "obrazy/wiosna-botticelli.jpg",
-  "obrazy/zbieraczki-klosow.jpg",
   "obrazy/zniwiarze.jpg",
 ];
