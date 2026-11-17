@@ -9,6 +9,7 @@ const OBRAZY = [
   "obrazy/lekcja-anatomii.jpg",
   "obrazy/moulin-de-la-galette.jpg",
   "obrazy/mysliwi-na-sniegu.jpg",
+  "obrazy/narodziny-wenus.jpg",
   "obrazy/ostatnia-wieczerza.jpg",
   "obrazy/powolanie-mateusza.jpg",
   "obrazy/przypowiesc-o-slepcach.jpg",
