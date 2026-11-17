@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Impro Ruletka</title>
+<style>
+  html, body {
+    margin: 0; height: 100%; background: #000; overflow: hidden;
+    cursor: none; user-select: none;
+  }
+  .layer { position: fixed; inset: 0; display: none; }
+  .on { display: block; }
+
+  #logo { background: #f07a10; }
+  #logo .bg {
+    position: absolute; inset: -10%;
+    background: url("is.png") center / cover;
+    filter: blur(40px);
+  }
+  #logo .fg {
+    position: absolute; inset: 0; margin: auto;
+    height: 100%; width: auto; max-width: 100%;
+  }
+
+  #pic img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  #pic.reveal img { animation: reveal 0.9s ease-out; }
+  @keyframes reveal { from { transform: scale(1.06); } to { transform: scale(1); } }
+  #flash {
+    position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none;
+  }
+  #pic.reveal #flash { animation: flash 0.7s ease-out; }
+  @keyframes flash { from { opacity: 0.8; } to { opacity: 0; } }
+
+  #warn {
+    position: fixed; left: 0; right: 0; bottom: 20px; text-align: center;
+    font: 24px sans-serif; color: #fff; background: #b00; padding: 10px; display: none;
+  }
+</style>
+</head>
+<body>
+<div id="logo" class="layer on">
+  <div class="bg"></div>
+  <img class="fg" src="is.png" alt="">
+</div>
+<div id="pic" class="layer">
+  <img id="picImg" alt="">
+  <div id="flash"></div>
+</div>
+<div id="warn">Brak obrazów — dodaj pliki do folderu obrazy/ i wpisz je do obrazy.js</div>
+
+<script src="obrazy.js"></script>
+<script>
+// Cykl dla jednej grupy (każdy krok = Enter):
+// logo → losowanie → obraz → blackout → obraz (ten sam) → logo dla następnej grupy.
+const NEXT_KEYS = ["Enter", " ", "ArrowRight", "ArrowDown", "PageDown"];
+const BACK_KEYS = ["Backspace", "ArrowLeft", "ArrowUp", "PageUp"];
+
+const all = (typeof OBRAZY !== "undefined" ? OBRAZY : []).map(encodeURI);
+// Preload so the spin doesn't flash half-loaded images.
+all.forEach(src => { const i = new Image(); i.src = src; });
+
+const logoEl = document.getElementById("logo");
+const picEl = document.getElementById("pic");
+const picImg = document.getElementById("picImg");
+if (all.length === 0) document.getElementById("warn").style.display = "block";
+
+let state = { mode: "logo", img: null, pool: all.slice() };
+const history = [];
+let spinning = false;
+
+function render() {
+  logoEl.classList.toggle("on", state.mode === "logo");
+  picEl.classList.toggle("on", state.mode === "show" || state.mode === "show2");
+  if (state.img) picImg.src = state.img;
+}
+
+function go(next) {
+  history.push(state);
+  state = next;
+  render();
+}
+
+function next() {
+  if (spinning) return;
+  switch (state.mode) {
+    case "logo":  return spin();
+    case "show":  return go({ ...state, mode: "black" });
+    case "black": return go({ ...state, mode: "show2" });
+    case "show2": return go({ ...state, mode: "logo" });
+  }
+}
+
+function back() {
+  if (spinning || history.length === 0) return;
+  state = history.pop();
+  picEl.classList.remove("reveal");
+  render();
+}
+
+function spin() {
+  if (all.length === 0) return;
+  // Each group gets a different painting; refill only once everything has been used.
+  const pool = state.pool.length ? state.pool : all.slice();
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  const rest = pool.filter(p => p !== chosen);
+
+  spinning = true;
+  picEl.classList.remove("reveal");
+  logoEl.classList.remove("on");
+  picEl.classList.add("on");
+
+  let delay = 45, prev = null;
+  const tick = () => {
+    if (delay > 420 || all.length === 1) {
+      spinning = false;
+      picImg.src = chosen;
+      void picEl.offsetWidth; // restart the CSS animation
+      picEl.classList.add("reveal");
+      go({ mode: "show", img: chosen, pool: rest });
+      return;
+    }
+    let cand;
+    do { cand = all[Math.floor(Math.random() * all.length)]; }
+    while (all.length > 1 && cand === prev);
+    prev = cand;
+    picImg.src = cand;
+    delay *= 1.12;
+    setTimeout(tick, delay);
+  };
+  tick();
+}
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(() => {});
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "f" || e.key === "F") { toggleFullscreen(); return; }
+  if (NEXT_KEYS.includes(e.key)) {
+    e.preventDefault();
+    if (!document.fullscreenElement) toggleFullscreen();
+    next();
+  } else if (BACK_KEYS.includes(e.key)) {
+    e.preventDefault();
+    back();
+  }
+});
+</script>
+</body>
+</html>
