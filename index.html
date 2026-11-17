@@ -40,6 +40,12 @@
     position: fixed; left: 0; right: 0; bottom: 20px; text-align: center;
     font: 24px sans-serif; color: #fff; background: #b00; padding: 10px; display: none;
   }
+  #load {
+    position: fixed; right: 16px; bottom: 16px; z-index: 1;
+    font: 18px sans-serif; color: #fff; background: rgba(0,0,0,0.6);
+    padding: 6px 12px; border-radius: 6px; transition: opacity 1s;
+  }
+  #load.done { opacity: 0; }
 </style>
 </head>
 <body>
@@ -52,6 +58,7 @@
   <div id="flash"></div>
 </div>
 <div id="warn">Brak obrazów — dodaj pliki do folderu obrazy/ i wpisz je do obrazy.js</div>
+<div id="load"></div>
 
 <script src="obrazy.js"></script>
 <script>
@@ -60,16 +67,52 @@
 const NEXT_KEYS = ["Enter", " ", "ArrowRight", "ArrowDown", "PageDown"];
 const BACK_KEYS = ["Backspace", "ArrowLeft", "ArrowUp", "PageUp"];
 
-const all = (typeof OBRAZY !== "undefined" ? OBRAZY : []).map(encodeURI);
-// Preload so the spin doesn't flash half-loaded images.
-all.forEach(src => { const i = new Image(); i.src = src; });
+const sources = (typeof OBRAZY !== "undefined" ? OBRAZY : []).map(encodeURI);
+let all = []; // filled with in-memory URLs once every painting has loaded
+const keepAlive = [];
 
 const logoEl = document.getElementById("logo");
 const picEl = document.getElementById("pic");
 const picImg = document.getElementById("picImg");
-if (all.length === 0) document.getElementById("warn").style.display = "block";
+const loadEl = document.getElementById("load");
+const warnEl = document.getElementById("warn");
 
-let state = { mode: "logo", img: null, pool: all.slice() };
+// Blob URLs keep each painting in memory for the whole session, so the show never needs the network again.
+// fetch() is refused on file://, but there the files are local anyway, so the plain path is fine.
+async function preload(src) {
+  let url = src;
+  try {
+    const r = await fetch(src);
+    if (r.ok) url = URL.createObjectURL(await r.blob());
+  } catch {}
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  keepAlive.push(img);
+  return url;
+}
+
+async function preloadAll() {
+  if (sources.length === 0) { warnEl.style.display = "block"; loadEl.remove(); return; }
+  let done = 0;
+  const failed = [];
+  const show = () => loadEl.textContent = `Wczytywanie obrazów ${done}/${sources.length}`;
+  show();
+  const urls = await Promise.all(sources.map(src =>
+    preload(src).catch(() => { failed.push(decodeURI(src)); return null; })
+                .finally(() => { done++; show(); })));
+  all = urls.filter(Boolean);
+  if (failed.length) {
+    warnEl.textContent = `Nie wczytano ${failed.length} obrazów (odśwież stronę): ${failed.join(", ")}`;
+    warnEl.style.display = "block";
+  }
+  loadEl.textContent = `Gotowe: ${all.length} obrazów`;
+  setTimeout(() => loadEl.classList.add("done"), 1500);
+}
+preloadAll();
+
+// An empty pool makes the first spin refill it from `all`.
+let state = { mode: "logo", img: null, pool: [] };
 const history = [];
 let spinning = false;
 
