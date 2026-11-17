@@ -2,11 +2,13 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Impro Ruletka</title>
 <style>
   html, body {
     margin: 0; height: 100%; background: #000; overflow: hidden;
     cursor: none; user-select: none;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .layer { position: fixed; inset: 0; display: none; }
   .on { display: block; }
@@ -139,7 +141,8 @@ function spin() {
 
 function toggleFullscreen() {
   if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
+  // iPhone Safari has no Fullscreen API on regular elements.
+  else document.documentElement.requestFullscreen?.().catch(() => {});
 }
 
 document.addEventListener("keydown", e => {
@@ -152,6 +155,14 @@ document.addEventListener("keydown", e => {
     e.preventDefault();
     back();
   }
+});
+
+// Landscape phones are wider than 900px, so a coarse pointer also counts as mobile.
+const MOBILE = matchMedia("(max-width: 900px), (pointer: coarse)");
+document.addEventListener("click", () => {
+  if (!MOBILE.matches) return;
+  if (!document.fullscreenElement) toggleFullscreen();
+  next();
 });
 </script>
 </body>
