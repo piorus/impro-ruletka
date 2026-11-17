@@ -35,7 +35,7 @@
   }
   #pic.reveal #flash { animation: flash 0.7s ease-out; }
   @keyframes flash { from { opacity: 0.8; } to { opacity: 0; } }
-  #pic.fade { opacity: 0; transition: opacity 0.8s ease-in; }
+  #pic.fade { opacity: 0; transition: opacity 1.6s ease-in; }
 
   #warn {
     position: fixed; left: 0; right: 0; bottom: 20px; text-align: center;
@@ -148,7 +148,7 @@ function next() {
   }
 }
 
-const FADE_MS = 800; // keep in sync with the #pic.fade transition
+const FADE_MS = 1600; // keep in sync with the #pic.fade transition
 
 function fadeToBlack() {
   busy = true;
