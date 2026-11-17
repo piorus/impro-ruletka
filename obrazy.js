@@ -24,7 +24,6 @@ const OBRAZY = [
   "obrazy/tratwa-meduzy.jpg",
   "obrazy/wertumnus.jpg",
   "obrazy/wesele-chlopskie.jpg",
-  "obrazy/wielka-fala.jpg",
   "obrazy/wiosna-botticelli.jpg",
   "obrazy/zniwiarze.jpg",
 ];
