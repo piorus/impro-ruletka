@@ -35,6 +35,7 @@
   }
   #pic.reveal #flash { animation: flash 0.7s ease-out; }
   @keyframes flash { from { opacity: 0.8; } to { opacity: 0; } }
+  #pic.fade { opacity: 0; transition: opacity 0.8s ease-in; }
 
   #warn {
     position: fixed; left: 0; right: 0; bottom: 20px; text-align: center;
@@ -114,12 +115,12 @@ preloadAll();
 // An empty pool makes the first spin refill it from `all`.
 let state = { mode: "logo", img: null, pool: [] };
 const history = [];
-let spinning = false;
+let busy = false;
 // Paintings in draw order, so keys 1–9 can bring one back if the moderator skipped past it.
 const drawn = [];
 
 function recall(n) {
-  if (spinning || !drawn[n - 1]) return;
+  if (busy || !drawn[n - 1]) return;
   picEl.classList.remove("reveal");
   // show2 makes the next Enter go straight to the logo; the pool stays untouched.
   go({ ...state, mode: "show2", img: drawn[n - 1] });
@@ -138,17 +139,30 @@ function go(next) {
 }
 
 function next() {
-  if (spinning) return;
+  if (busy) return;
   switch (state.mode) {
     case "logo":  return spin();
-    case "show":  return go({ ...state, mode: "black" });
+    case "show":  return fadeToBlack();
     case "black": return go({ ...state, mode: "show2" });
     case "show2": return go({ ...state, mode: "logo" });
   }
 }
 
+const FADE_MS = 800; // keep in sync with the #pic.fade transition
+
+function fadeToBlack() {
+  busy = true;
+  picEl.classList.remove("reveal");
+  picEl.classList.add("fade");
+  setTimeout(() => {
+    go({ ...state, mode: "black" });
+    picEl.classList.remove("fade");
+    busy = false;
+  }, FADE_MS);
+}
+
 function back() {
-  if (spinning || history.length === 0) return;
+  if (busy || history.length === 0) return;
   state = history.pop();
   picEl.classList.remove("reveal");
   render();
@@ -163,7 +177,7 @@ function spin() {
   const chosen = pool[Math.floor(Math.random() * pool.length)];
   const rest = pool.filter(p => p !== chosen);
 
-  spinning = true;
+  busy = true;
   picEl.classList.remove("reveal");
   logoEl.classList.remove("on");
   picEl.classList.add("on");
@@ -171,7 +185,7 @@ function spin() {
   let delay = 45, prev = null;
   const tick = () => {
     if (delay > 420 || all.length === 1) {
-      spinning = false;
+      busy = false;
       picImg.src = chosen;
       void picEl.offsetWidth; // restart the CSS animation
       picEl.classList.add("reveal");
