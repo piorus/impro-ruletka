@@ -2,7 +2,6 @@
 const OBRAZY = [
   "obrazy/burlacy.jpg",
   "obrazy/grande-jatte.jpg",
-  "obrazy/grunwald.jpg",
   "obrazy/jedzacy-kartofle.jpg",
   "obrazy/kapiacy-asnieres.jpg",
   "obrazy/kosz-owocow.jpg",
@@ -21,7 +20,6 @@ const OBRAZY = [
   "obrazy/taniec-chlopski.jpg",
   "obrazy/taniec-matisse.jpg",
   "obrazy/tratwa-meduzy.jpg",
-  "obrazy/wertumnus.jpg",
   "obrazy/wesele-chlopskie.jpg",
   "obrazy/wiosna-botticelli.jpg",
   "obrazy/zniwiarze.jpg",
